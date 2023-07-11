@@ -5,7 +5,9 @@ set -e
 TARGET=/usr/local/bin/dns-heaven
 PLIST=/Library/LaunchDaemons/com.greenboxal.dnsheaven.plist
 
-curl -L -o $TARGET https://github.com/greenboxal/dns-heaven/releases/download/v1.0.0/dns-heaven_1.0.0_darwin_amd64
+# curl -L -o $TARGET https://github.com/greenboxal/dns-heaven/releases/download/v1.0.0/dns-heaven_1.0.0_darwin_amd64
+go build cmd/dns-heaven/dns-heaven.go
+mv dns-heaven $TARGET
 chmod +x $TARGET
 
 cat > $PLIST <<EOF

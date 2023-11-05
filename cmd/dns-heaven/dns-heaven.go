@@ -19,7 +19,6 @@ func init() {
 	flag.IntVar(&config.Timeout, "timeout", 2000, "request timeout")
 	flag.IntVar(&config.Interval, "interval", 1000, "interval between requests")
 
-
 	config.Address = make([]string, 0)
 	for _, address := range strings.Split(addresses, ",") {
 		if address != "" {
@@ -32,7 +31,6 @@ func main() {
 	flag.Parse()
 
 	resolver, err := osx.New(config)
-
 	if err != nil {
 		logrus.WithError(err).Error("error starting server")
 		os.Exit(1)

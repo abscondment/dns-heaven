@@ -16,7 +16,6 @@ func NewServer(config *Config, resolver Resolver) *Server {
 	resolve := func(net string) dns.HandlerFunc {
 		return func(r dns.ResponseWriter, msg *dns.Msg) {
 			result, err := resolver.Resolve(net, msg)
-
 			if err != nil {
 				logrus.WithError(err).WithField("req", msg).Error("error resolving request")
 

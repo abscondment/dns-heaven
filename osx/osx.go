@@ -41,7 +41,6 @@ func New(config *dnsheaven.Config) (*Resolver, error) {
 	}
 
 	err := r.refresh()
-
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +59,8 @@ func (r *Resolver) Resolve(net string, msg *dns.Msg) (*dns.Msg, error) {
 func (r *Resolver) run() {
 	timer := time.Tick(1 * time.Second)
 
-	for _ = range timer {
+	for range timer {
 		err := r.refresh()
-
 		if err != nil {
 			logrus.WithError(err).Error("error refreshing dns config")
 			continue
@@ -81,13 +79,11 @@ func (r *Resolver) refresh() error {
 	cmd := exec.Command("/usr/sbin/scutil", "--dns")
 
 	output, err := cmd.CombinedOutput()
-
 	if err != nil {
 		return err
 	}
 
 	parsed, err := ParseScutilDns(string(output))
-
 	if err != nil {
 		return err
 	}
@@ -156,7 +152,6 @@ func (r *Resolver) hijack() error {
 
 	for i, addr := range r.config.Address {
 		host, _, err := net.SplitHostPort(addr)
-
 		if err != nil {
 			return err
 		}
@@ -165,7 +160,7 @@ func (r *Resolver) hijack() error {
 		nameservers[i] = fmt.Sprintf("nameserver %s", host)
 	}
 
-	err := ioutil.WriteFile("/etc/resolv.conf", []byte(strings.Join(nameservers, "\n")), 0644)
+	err := ioutil.WriteFile("/etc/resolv.conf", []byte(strings.Join(nameservers, "\n")), 0o644)
 	if err != nil {
 		return err
 	}

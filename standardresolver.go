@@ -48,7 +48,6 @@ func (r *StandardResolver) Lookup(net string, req *dns.Msg) (message *dns.Msg, e
 		defer wg.Done()
 
 		r, _, err := c.Exchange(req, nameserver)
-
 		if err != nil {
 			logrus.WithError(err).WithField("qname", qname).WithField("ns", nameserver).Error("error resolving query")
 			return

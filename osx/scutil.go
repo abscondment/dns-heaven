@@ -74,7 +74,6 @@ func ParseScutilDns(data string) (*DnsInfo, error) {
 				currentResolver.Domain = value
 			} else if name == "timeout" {
 				timeout, err := strconv.Atoi(value)
-
 				if err != nil {
 					continue
 				}

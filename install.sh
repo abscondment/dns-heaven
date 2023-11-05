@@ -6,7 +6,7 @@ TARGET=/usr/local/bin/dns-heaven
 PLIST=/Library/LaunchDaemons/com.greenboxal.dnsheaven.plist
 
 # curl -L -o $TARGET https://github.com/greenboxal/dns-heaven/releases/download/v1.0.0/dns-heaven_1.0.0_darwin_amd64
-go build cmd/dns-heaven/dns-heaven.go
+CGO_ENABLED=0 go build -ldflags '-extldflags "-static"' cmd/dns-heaven/dns-heaven.go
 mv dns-heaven $TARGET
 chmod +x $TARGET
 
@@ -31,4 +31,3 @@ EOF
 
 chmod 644 $PLIST
 launchctl load -w $PLIST
-

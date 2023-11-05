@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"strings"
 
 	"github.com/greenboxal/dns-heaven"
 	"github.com/greenboxal/dns-heaven/osx"
@@ -13,9 +14,18 @@ import (
 var config = &dnsheaven.Config{}
 
 func init() {
-	flag.StringVar(&config.Address, "address", "127.0.0.1:53", "address to listen")
+	addresses := ""
+	flag.StringVar(&addresses, "addresses", "127.0.0.1:53,[::1]:53", "addresses to listen to, comma-delimited")
 	flag.IntVar(&config.Timeout, "timeout", 2000, "request timeout")
 	flag.IntVar(&config.Interval, "interval", 1000, "interval between requests")
+
+
+	config.Address = make([]string, 0)
+	for _, address := range strings.Split(addresses, ",") {
+		if address != "" {
+			config.Address = append(config.Address, address)
+		}
+	}
 }
 
 func main() {

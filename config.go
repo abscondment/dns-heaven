@@ -1,7 +1,7 @@
 package dnsheaven
 
 type Config struct {
-	Address  string
+	Address  []string
 	Timeout  int
 	Interval int
 }

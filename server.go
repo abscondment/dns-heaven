@@ -8,9 +8,8 @@ import (
 )
 
 type Server struct {
-	config *Config
-	tcp    *dns.Server
-	udp    *dns.Server
+	config  *Config
+	servers []*dns.Server
 }
 
 func NewServer(config *Config, resolver Resolver) *Server {
@@ -44,22 +43,24 @@ func NewServer(config *Config, resolver Resolver) *Server {
 		}
 	}
 
-	tcp := &dns.Server{
-		Addr:    config.Address,
-		Net:     "tcp",
-		Handler: resolve("tcp"),
-	}
+	servers := make([]*dns.Server, 0, len(config.Address)*2)
+	for _, addr := range config.Address {
+		servers = append(servers, &dns.Server{
+			Addr:    addr,
+			Net:     "tcp",
+			Handler: resolve("tcp"),
+		})
 
-	udp := &dns.Server{
-		Addr:    config.Address,
-		Net:     "udp",
-		Handler: resolve("udp"),
+		servers = append(servers, &dns.Server{
+			Addr:    addr,
+			Net:     "udp",
+			Handler: resolve("udp"),
+		})
 	}
 
 	return &Server{
-		config: config,
-		tcp:    tcp,
-		udp:    udp,
+		config:  config,
+		servers: servers,
 	}
 }
 
@@ -68,9 +69,10 @@ func (s *Server) Start() error {
 
 	errch := make(chan error)
 
-	wg.Add(2)
-	go s.runServer(wg, errch, s.tcp)
-	go s.runServer(wg, errch, s.udp)
+	wg.Add(len(s.servers))
+	for _, serv := range s.servers {
+		go s.runServer(wg, errch, serv)
+	}
 
 	go func() {
 		wg.Wait()
@@ -87,15 +89,15 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Shutdown() error {
-	err1 := s.tcp.Shutdown()
-	err2 := s.udp.Shutdown()
-
-	if err1 != nil {
-		return err1
+	errs := make([]error, len(s.servers))
+	for i, serv := range s.servers {
+		errs[i] = serv.Shutdown()
 	}
 
-	if err2 != nil {
-		return err2
+	for _, err := range errs {
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

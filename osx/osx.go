@@ -152,17 +152,20 @@ func (r *Resolver) buildResolver(re *ResolverInfo) *dnsheaven.StandardResolver {
 }
 
 func (r *Resolver) hijack() error {
-	host, _, err := net.SplitHostPort(r.config.Address)
+	nameservers := make([]string, len(r.config.Address))
 
-	if err != nil {
-		return err
+	for i, addr := range r.config.Address {
+		host, _, err := net.SplitHostPort(addr)
+
+		if err != nil {
+			return err
+		}
+
+		// FIXME: This assumes that we're listening on port 53
+		nameservers[i] = fmt.Sprintf("nameserver %s", host)
 	}
 
-	// FIXME: This assumes that we're listening on port 53
-	content := fmt.Sprintf("nameserver %s", host)
-
-	err = ioutil.WriteFile("/etc/resolv.conf", []byte(content), 0644)
-
+	err := ioutil.WriteFile("/etc/resolv.conf", []byte(strings.Join(nameservers, "\n")), 0644)
 	if err != nil {
 		return err
 	}
